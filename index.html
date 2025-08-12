@@ -1,0 +1,1278 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pakistan Independence Day — Joyable Quiz</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --pak-green: #006b3f;
+            --light-green: #b9e0c8
+        }
+
+        body {
+            background: linear-gradient(180deg, #eaf7ef 0%, #f7fff9 100%);
+            min-height: 100vh;
+            background-image: url('./pak_flag_waving_800x486_hd_realistic_v2.gif');
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        .list-group-item-success {
+            z-index: 0 !important;
+        }
+
+        .list-group-item-danger {
+            z-index: 0 !important;
+        }
+
+        .brand {
+            color: var(--pak-green)
+        }
+
+        .flag-emoji {
+            font-size: 1.6rem
+        }
+
+        .quiz-card {
+            border-radius: 18px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08)
+        }
+
+        .option-btn {
+            text-align: left
+        }
+
+        .reaction-overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none
+        }
+
+        .reaction {
+            font-size: 4rem;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all .6s ease
+        }
+
+        .reaction.show {
+            opacity: 1;
+            transform: translateY(0)
+        }
+
+        .confetti {
+            position: fixed;
+            pointer-events: none;
+            inset: 0;
+            overflow: hidden
+        }
+
+        .confetti .piece {
+            position: absolute;
+            font-size: 1.2rem;
+            animation: fall linear;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-10vh) rotate(0deg)
+            }
+
+            100% {
+                transform: translateY(110vh) rotate(360deg)
+            }
+        }
+
+        #unmute-banner {
+            z-index: 1060
+        }
+
+        /* ---------- Stylish Leaderboard ---------- */
+        /* ---------- Stylish Leaderboard (replacement) ---------- */
+        .leaderboard {
+            border-radius: 12px;
+            overflow: hidden;
+            font-size: 14px;
+            background: linear-gradient(180deg, #f8fffa, #ecfff0);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .leaderboard .card-header {
+            background: linear-gradient(90deg, var(--pak-green), #00924a);
+            color: #fff;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+            font-size: 1rem;
+        }
+
+        /* list container (keep ul semantics) */
+        #leaderboard-list {
+            padding: 10px;
+            max-height: calc(100vh - 240px);
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* entry card */
+        .lb-entry {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 6px 18px rgba(2, 40, 20, 0.05);
+            transition: transform .18s ease, box-shadow .18s ease;
+            border-left: 4px solid transparent;
+        }
+
+        /* hover lift */
+        .lb-entry:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(2, 40, 20, 0.09);
+        }
+
+        /* rank badge / trophy area */
+        .lb-entry .rank-badge {
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 1.05rem;
+            background: linear-gradient(180deg, #e9fff0, #f1fff7);
+            color: var(--pak-green);
+            box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.03);
+        }
+
+        /* info area */
+        .lb-entry .info {
+            flex: 1;
+            min-width: 0
+        }
+
+        .lb-entry .name {
+            font-weight: 800;
+            font-size: 0.98rem;
+            color: #06402b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .lb-entry .meta {
+            font-size: 0.78rem;
+            color: #6b7a71;
+            margin-top: 2px;
+        }
+
+        /* the score at right */
+        .lb-entry .score {
+            min-width: 68px;
+            text-align: right;
+            font-weight: 900;
+            color: #0d5b39;
+            font-size: 0.98rem;
+        }
+
+        /* tiny score bar */
+        .lb-entry .bar-wrap {
+            width: 100%;
+            height: 8px;
+            background: #eef8f0;
+            border-radius: 8px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .lb-entry .bar {
+            height: 100%;
+            border-radius: 8px;
+            background: linear-gradient(90deg, #9eea98, #2bb06b);
+            width: 0%;
+            transition: width .6s ease;
+        }
+
+        /* special styles for top 3 */
+        .lb-entry.first-place {
+            transform: translateY(-6px);
+            border-left-color: #ffd700;
+            background: linear-gradient(90deg, #fffdf0, #fffcee);
+        }
+
+        .lb-entry.first-place .rank-badge {
+            background: linear-gradient(45deg, #ffd700, #ffdd66);
+            color: #3b2b00;
+            font-size: 1.2rem;
+        }
+
+        .lb-entry.first-place .name {
+            font-size: 1.12rem;
+            font-weight: 900;
+        }
+
+        /* second & third */
+        .lb-entry.second-place .rank-badge {
+            background: linear-gradient(45deg, #c0c0c0, #e6e6e6);
+            color: #222;
+        }
+
+        .lb-entry.third-place .rank-badge {
+            background: linear-gradient(45deg, #cd7f32, #e6a070);
+            color: #222;
+        }
+
+        /* crown for first */
+        .lb-entry .crown {
+            font-size: 1.1rem;
+            margin-right: 6px;
+            transform: translateY(-1px);
+        }
+
+        /* subtle appear animation */
+        @keyframes entry-in {
+            from {
+                opacity: 0;
+                transform: translateY(6px) scale(.995)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1)
+            }
+        }
+
+        .lb-entry {
+            animation: entry-in .28s ease both;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Score result modal (paste after leaderboardModal) -->
+    <div class="modal fade" id="scoreModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" style="background:var(--pak-green); color:white">
+                    <h5 class="modal-title">Your Result</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <div style="font-size:2.4rem; font-weight:800;" id="score-percent">0%</div>
+                    <p id="score-message" class="mt-2 mb-0"></p>
+                    <div class="small text-muted mt-2">Score: <span id="score-value">0</span> / <span
+                            id="score-total">0</span></div>
+                </div>
+                <div class="modal-footer">
+                    <button id="confirm-save-score" class="btn btn-success">Save to Leaderboard</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="" style="background:#f1fcf5;">
+
+        <div style="text-align: center; padding:10px 0px;">
+            <a class="navbar-brand text-white fw-bold" href="#">
+                <img src="https://vectorseek.com/wp-content/uploads/2023/07/Stylo-Logo-Vector.svg-.png" height="70px"
+                    alt="">
+            </a>
+
+        </div>
+    </nav>
+    <nav class="navbar navbar-expand-lg" style="background:linear-gradient(90deg,var(--pak-green),#00924a);">
+        <div class="container">
+            <a class="navbar-brand text-white fw-bold" href="#">
+                🇵🇰 <span class="ms-2">میں ہوں پاکستانی</span>
+            </a>
+            <div class="d-flex align-items-center">
+                <div class="me-3 text-white small" id="top-summary">Top: —</div>
+
+                <!-- Audio controls -->
+                <div class="me-2 d-flex align-items-center">
+                    <!-- Single bg audio element (keep only one) -->
+                    <audio id="bg-audio" preload="auto" playsinline autoplay loop muted></audio>
+
+                    <!-- Audio toggle button (added so script has the element it expects) -->
+                    <button id="audio-toggle" class="btn btn-outline-light btn-sm me-2" title="Play/Pause audio">
+                        <i class="fa-solid fa-play"></i> Play
+                    </button>
+
+                    <label class="btn btn-outline-light btn-sm mb-0" title="Change song">
+                        <input id="audio-file" type="file" accept="audio/*" style="display:none"> Change Song
+                    </label>
+                </div>
+
+                <!-- <button class="btn btn-light btn-sm me-2" id="btn-leaderboard">Leaderboard</button> -->
+            </div>
+        </div>
+    </nav>
+    <div class="d-flex" style="height: calc(100vh - 147px);">
+        <!-- Left Sidebar (1/4 width) -->
+        <div class="col-3 col-md-3 col-lg-3 bg-light p-3" style="overflow: auto;">
+            <div class="leaderboard card shadow-sm">
+                <div class="card-header bg-success text-white text-center fw-bold">
+                    🏆 Leaderboard
+                </div>
+                <ul id="leaderboard-list" class="list-group list-group-flush">
+                    <li class="list-group-item text-muted">No scores yet</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- Main Content (3/4 width) -->
+        <main class="col-9 col-md-9 col-lg-9 container" style="opacity: 0.9;">
+            <div class="row justify-content-center" style="margin-top: 13%;">
+                <div class="col-lg-8 col-md-10">
+                    <div class="card p-4 quiz-card" style="background-color: #e5ffef;">
+                        <div id="start-screen">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/4/43/Flag_map_of_Pakistan.png"
+                                        alt="flag" style="border-radius:6px; height:auto; width:200px">
+                                </div>
+                                <div>
+                                    <h3 class="brand">Celebrate Pakistan Independence Day</h3>
+                                    <p class="mb-1 text-muted">Do you claim to be the most patriotic person in Stylo Pvt
+                                        Ltd? 🇵🇰 </br>
+                                        Prove it by taking the Pakistan Knowledge Quiz — and win exciting prize money!
+                                    </p>
+                                    <small class="text-muted">EVENT: Pakistan Independence Day.</small>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <div class="row g-2">
+                                <div class="col-md-5">
+                                    <input id="player-name" class="form-control" placeholder="Enter participant name" />
+                                </div>
+                                <div class="col-md-3">
+                                    <input id="employee-code" class="form-control"
+                                        placeholder="Employee code (unique)" />
+                                </div>
+                                <div class="col-md-4 d-grid">
+                                    <button id="btn-start" class="btn btn-success">Start Quiz</button>
+                                </div>
+
+                            </div>
+
+                            <div class="mt-3 text-muted small">
+                                <p class="mb-1"><strong>Note:</strong> This quiz celebrates Pakistan's Independence Day
+                                    —
+                                    <strong>14 August</strong> (1947). Test your knowledge of the nation's history,
+                                    heroes
+                                    and culture. Good luck to all participants — may the most patriotic win!
+                                </p>
+                                <p class="mb-0"><em class="text-muted">Tip: For a more challenging contest, set a short
+                                        time-per-question and use the leaderboard to track top scorers.</em></p>
+                            </div>
+
+                        </div>
+
+                        <!-- Quiz area -->
+                        <div id="quiz-screen" style="display:none">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <span class="badge bg-success" id="q-progress">Question 1/15</span>
+                                    <h5 id="question-text" class="mt-2">Loading...</h5>
+                                    <div id="timer" class="mt-2 fw-bold text-danger">⏳ 10s</div>
+
+                                </div>
+                                <div class="text-end">
+                                    <div class="small text-muted">Player:</div>
+                                    <div id="player-label" class="fw-bold brand">-</div>
+                                </div>
+                            </div>
+
+                            <div id="options" class="list-group mb-3"></div>
+
+                            <div class="d-flex justify-content-between">
+                                <button id="btn-next" class="btn btn-outline-secondary" disabled>Next</button>
+                                <div>
+                                    <span class="me-2 small text-muted">Score:</span>
+                                    <span id="score" class="fw-bold brand">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Result -->
+                        <div id="result-screen" style="display:none">
+                            <div class="text-center">
+                                <h3 class="brand" id="result-title">Quiz Complete!</h3>
+                                <p class="lead">Your score: <strong id="final-score">0</strong>/15</p>
+                                <div class="d-grid gap-2 col-6 mx-auto">
+                                    <button id="btn-submit-score" class="btn btn-success">Submit Score to
+                                        Leaderboard</button>
+                                    <button id="btn-restart" class="btn btn-outline-secondary">Play Again</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <div class="reaction-overlay">
+        <div id="reaction" class="reaction"></div>
+    </div>
+    <div class="confetti" id="confetti"></div>
+
+    <div class="modal fade" id="leaderboardModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" style="background:var(--pak-green); color:white">
+                    <h5 class="modal-title">Leaderboard — Top Participants</h5>
+                    <div>
+                        <button id="btn-export" class="btn btn-sm btn-light me-2">Export CSV</button>
+                        <button id="btn-clear" class="btn btn-sm btn-danger me-2">Clear</button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <!-- stylish list container; items inserted by JS -->
+                    <div id="leaderboard-list"></div>
+                    <div class="mt-3 text-muted small">Showing top 10 participants. Congrats to the winners! 🏆</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="unmute-banner" class="position-fixed bottom-0 end-0 m-3 p-2 bg-success text-white rounded"
+        style=" cursor:pointer">Enable sound 🔊</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        /***** CONFIGURATION ******/
+        const REMOTE_QUESTION_ENDPOINT = null;
+        const QUESTIONS_PER_QUIZ = 15;
+        // const DEFAULT_SONG = 'https://www.poemsurdu.com/wp-content/uploads/2015/07/Dil-Dil-Pakistan.mp3';
+        const DEFAULT_SONG = 'Dil-Dil-Pakistan.mp3';
+
+        /***** SAMPLE QUESTIONS (fallback) *****/
+        const sampleQuestions = [
+            { q: 'Who was the first Governor-General of Pakistan after the death of Quaid-e-Azam?', options: ['Khawaja Nazimuddin', 'Iskander Mirza', 'Ghulam Muhammad', 'Ayub Khan'], answer: 'Khawaja Nazimuddin' },
+            { q: 'Which was the first airline of Pakistan?', options: ['PIA', 'Orient Airways', 'Airblue', 'Shaheen Air'], answer: 'Orient Airways' },
+            { q: 'Who designed the National Flag of Pakistan?', options: ['Amiruddin Kidwai', 'Chaudhry Rehmat Ali', 'Syed Amir Shah', 'Liaquat Ali Khan'], answer: 'Amiruddin Kidwai' },
+            { q: 'Which was the first radio station to broadcast Pakistan’s independence announcement?', options: ['Radio Pakistan Lahore', 'Radio Pakistan Karachi', 'All India Radio Delhi', 'Radio Pakistan Peshawar'], answer: 'Radio Pakistan Lahore' },
+            { q: 'Who was the first woman federal minister of Pakistan?', options: ['Fatima Jinnah', 'Begum Raana Liaquat Ali Khan', 'Shireen Mazari', 'Benazir Bhutto'], answer: 'Begum Raana Liaquat Ali Khan' },
+            { q: 'In which year was the first Constitution of Pakistan enforced?', options: ['1956', '1962', '1973', '1952'], answer: '1956' },
+            { q: 'Which is the oldest university in Pakistan?', options: ['University of Punjab', 'University of Karachi', 'University of Peshawar', 'Government College University'], answer: 'University of Punjab' },
+            { q: 'What was the original name of PIA?', options: ['Pakistan Air Services', 'Orient Airways', 'Pakistan National Airways', 'Pakistan Air Lines'], answer: 'Orient Airways' },
+            { q: 'Who was the first Chief Justice of Pakistan?', options: ['Sir Abdur Rashid', 'Muhammad Munir', 'Cornelius', 'Anwarul Haq'], answer: 'Sir Abdur Rashid' },
+            { q: 'Who was the first President of Pakistan?', options: ['Iskander Mirza', 'Ayub Khan', 'Yahya Khan', 'Zulfikar Ali Bhutto'], answer: 'Iskander Mirza' },
+            { q: 'What is the length of the Pakistan–China border?', options: ['523 km', '438 km', '600 km', '595 km'], answer: '523 km' },
+            { q: 'Which is the largest desert in Pakistan?', options: ['Thar', 'Cholistan', 'Kharan', 'Thal'], answer: 'Thar' },
+            { q: 'Who was the first Pakistani to win a Nobel Prize?', options: ['Abdus Salam', 'Malala Yousafzai', 'Ahmed Zewail', 'Dr. Samar Mubarakmand'], answer: 'Abdus Salam' },
+            { q: 'What is the highest civil award of Pakistan?', options: ['Hilal-e-Pakistan', 'Sitara-e-Pakistan', 'Nishan-e-Pakistan', 'Tamgha-e-Pakistan'], answer: 'Nishan-e-Pakistan' },
+            { q: 'Which city is called the Manchester of Pakistan?', options: ['Faisalabad', 'Karachi', 'Multan', 'Gujranwala'], answer: 'Faisalabad' },
+            { q: 'In which year did Pakistan become a nuclear power?', options: ['1998', '1999', '1996', '2000'], answer: '1998' },
+            { q: 'Who was the first Muslim Commander-in-Chief of the Pakistan Army?', options: ['Ayub Khan', 'Musa Khan', 'Asif Nawaz Janjua', 'Yahya Khan'], answer: 'Ayub Khan' },
+            { q: 'What is the national flower of Pakistan?', options: ['Rose', 'Jasmine', 'Tulip', 'Sunflower'], answer: 'Jasmine' },
+            { q: 'Which is the largest mosque in Pakistan?', options: ['Faisal Mosque', 'Badshahi Mosque', 'Grand Jamia Mosque', 'Shah Jahan Mosque'], answer: 'Faisal Mosque' },
+            { q: 'Who was the Prime Minister during the 1973 Constitution’s passing?', options: ['Zulfikar Ali Bhutto', 'Liaquat Ali Khan', 'Yahya Khan', 'Muhammad Khan Junejo'], answer: 'Zulfikar Ali Bhutto' },
+            { q: 'Which was the first bank in Pakistan?', options: ['Habib Bank', 'United Bank', 'National Bank', 'Muslim Commercial Bank'], answer: 'Habib Bank' },
+            { q: 'Who was the first female fighter pilot of Pakistan?', options: ['Ayesha Farooq', 'Marium Mukhtiar', 'Shahida Abbasi', 'Rabia Tariq'], answer: 'Ayesha Farooq' },
+            { q: 'What is the official national language of Pakistan?', options: ['Urdu', 'Punjabi', 'Sindhi', 'Pashto'], answer: 'Urdu' },
+            { q: 'Who was the second Governor-General of Pakistan?', options: ['Khawaja Nazimuddin', 'Iskander Mirza', 'Liaquat Ali Khan', 'Ayub Khan'], answer: 'Khawaja Nazimuddin' },
+            { q: 'Which Pakistani city is famous for surgical instruments?', options: ['Sialkot', 'Gujrat', 'Faisalabad', 'Multan'], answer: 'Sialkot' },
+            { q: 'Who was the first person to hoist Pakistan’s flag on foreign land?', options: ['Liaquat Ali Khan', 'Zafarullah Khan', 'Mohammad Ali Jinnah', 'Begum Raana Liaquat'], answer: 'Begum Raana Liaquat' },
+            { q: 'Which was the first television station in Pakistan?', options: ['PTV Lahore', 'PTV Karachi', 'PTV Islamabad', 'PTV Quetta'], answer: 'PTV Lahore' },
+            { q: 'When was the State Bank of Pakistan inaugurated?', options: ['1 July 1948', '14 August 1947', '1 July 1950', '23 March 1949'], answer: '1 July 1948' },
+            { q: 'Who was Pakistan’s first foreign minister?', options: ['Zafarullah Khan', 'Liaquat Ali Khan', 'Ayub Khan', 'Bhutto'], answer: 'Zafarullah Khan' },
+            { q: 'Which city is known as the City of Saints?', options: ['Multan', 'Lahore', 'Karachi', 'Sukkur'], answer: 'Multan' },
+            { q: 'What is the highest dam in Pakistan?', options: ['Tarbela', 'Mangla', 'Diamer-Bhasha', 'Warsak'], answer: 'Diamer-Bhasha' },
+            { q: 'Who was the founder of Muslim League?', options: ['Nawab Salimullah Khan', 'Allama Iqbal', 'Syed Ahmad Khan', 'Chaudhry Rehmat Ali'], answer: 'Nawab Salimullah Khan' },
+            { q: 'Which Pakistani cricketer has scored the fastest century in ODIs?', options: ['Shahid Afridi', 'Babar Azam', 'Fakhar Zaman', 'Imran Nazir'], answer: 'Shahid Afridi' },
+            { q: 'Which year saw the separation of East Pakistan?', options: ['1971', '1970', '1972', '1969'], answer: '1971' },
+            { q: 'Who was Pakistan’s first Chief of Air Staff?', options: ['Air Marshal Zafar Chaudhry', 'Air Marshal Asghar Khan', 'Air Marshal Anwar Shamim', 'Air Marshal Nur Khan'], answer: 'Air Marshal Zafar Chaudhry' },
+            { q: 'Which is the largest province of Pakistan by area?', options: ['Balochistan', 'Punjab', 'Sindh', 'KPK'], answer: 'Balochistan' },
+            { q: 'Who wrote the national anthem of Pakistan?', options: ['Hafeez Jalandhari', 'Allama Iqbal', 'Faiz Ahmed Faiz', 'Josh Malihabadi'], answer: 'Hafeez Jalandhari' },
+            { q: 'Which Pakistani city is known as the Paris of the East?', options: ['Karachi', 'Lahore', 'Quetta', 'Multan'], answer: 'Karachi' },
+            { q: 'Which was the first Pakistani film?', options: ['Teri Yaad', 'Intezar', 'Chiragh Jalta Raha', 'Armaan'], answer: 'Teri Yaad' },
+            { q: 'What is the length of the Karakoram Highway?', options: ['1300 km', '1200 km', '1500 km', '1600 km'], answer: '1300 km' },
+            { q: 'Who was the first Pakistani female to climb Mount Everest?', options: ['Samina Baig', 'Naila Kiani', 'Uzma Yousaf', 'Shamylah Rauf'], answer: 'Samina Baig' },
+            { q: 'Which Pakistani port is deep-sea and warm water?', options: ['Gwadar', 'Karachi', 'Qasim', 'Ormara'], answer: 'Gwadar' },
+            { q: 'What is the national drink of Pakistan?', options: ['Sugarcane Juice', 'Lassi', 'Green Tea', 'Rooh Afza'], answer: 'Sugarcane Juice' },
+            { q: 'When did Pakistan win its first Cricket World Cup?', options: ['1992', '1996', '1987', '1999'], answer: '1992' },
+            { q: 'Which Pakistani leader signed the Liaquat-Nehru Pact?', options: ['Liaquat Ali Khan', 'Ayub Khan', 'Zulfikar Ali Bhutto', 'Iskander Mirza'], answer: 'Liaquat Ali Khan' },
+            { q: 'What is the total number of districts in Pakistan (as of 2024)?', options: ['170+', '150+', '160+', '180+'], answer: '170+' },
+            { q: 'Which is the oldest fort in Pakistan?', options: ['Ranikot Fort', 'Rohtas Fort', 'Derawar Fort', 'Baltit Fort'], answer: 'Ranikot Fort' },
+            { q: 'Which Pakistani scientist is known as the Father of the Nuclear Program?', options: ['Abdul Qadeer Khan', 'Abdus Salam', 'Ishfaq Ahmad', 'Samar Mubarakmand'], answer: 'Abdul Qadeer Khan' },
+            // { q: 'When did Pakistan gain independence?', options: ['14 August 1947', '23 March 1930', '25 December 1971', '14 August 1950'], answer: '14 August 1947' },
+            // { q: 'Who is known as the Quaid-e-Azam?', options: ['Liaquat Ali Khan', 'Mohammad Ali Jinnah', 'Allama Iqbal', 'Fatima Jinnah'], answer: 'Mohammad Ali Jinnah' },
+            { q: 'Which city was the first capital of Pakistan?', options: ['Islamabad', 'Lahore', 'Karachi', 'Peshawar'], answer: 'Karachi' },
+            { q: 'What is the national sport of Pakistan?', options: ['Cricket', 'Hockey', 'Football', 'Kabaddi'], answer: 'Hockey' },
+            { q: 'Which movement is Allama Iqbal associated with?', options: ['Pakistan Movement', 'Khudai Khidmatgar', 'Red Shirt Movement', 'None'], answer: 'Pakistan Movement' },
+            { q: 'When is Pakistan Day observed?', options: ['14 August', '23 March', '11 September', '1 May'], answer: '23 March' },
+            { q: 'Which poet wrote the famous poem "Lab Pe Aati Hai Dua"?', options: ['Faiz Ahmed Faiz', 'Allama Iqbal', 'Muhammad Iqbal', 'A. R. Rahman'], answer: 'Allama Iqbal' },
+            { q: 'Which mountain is the highest in Pakistan?', options: ['Nanga Parbat', 'K2', 'Kangchenjunga', 'Mount Everest'], answer: 'K2' },
+            // { q: 'What colors are on the national flag of Pakistan?', options: ['Green and White', 'Red and White', 'Blue and Green', 'Green and Yellow'], answer: 'Green and White' },
+            { q: 'Who was the first Prime Minister of Pakistan?', options: ['Liaquat Ali Khan', 'Mohammad Ali Jinnah', 'Khawaja Nazimuddin', 'Zulfikar Ali Bhutto'], answer: 'Liaquat Ali Khan' },
+            { q: 'Where was the All-India Muslim League founded?', options: ['Lahore', 'Dhaka', 'Karachi', 'Delhi'], answer: 'Dhaka' },
+            { q: 'In which year was the Lahore Resolution passed?', options: ['1940', '1947', '1930', '1956'], answer: '1940' },
+            { q: 'Who presented the Lahore Resolution?', options: ['Liaquat Ali Khan', 'Maulvi Fazlul Haq', 'Allama Iqbal', 'Mohammad Ali Jinnah'], answer: 'Maulvi Fazlul Haq' },
+            { q: 'What does the white part of Pakistan’s flag represent?', options: ['Minorities', 'Peace', 'Unity', 'Islam'], answer: 'Minorities' },
+            { q: 'When was the first constitution of Pakistan enacted?', options: ['1956', '1962', '1973', '1949'], answer: '1956' },
+            { q: 'Who wrote Pakistan’s national anthem lyrics?', options: ['Hafeez Jullundhri', 'Faiz Ahmed Faiz', 'Josh Malihabadi', 'Allama Iqbal'], answer: 'Hafeez Jullundhri' },
+            { q: 'When was the national anthem officially adopted?', options: ['1954', '1947', '1965', '1971'], answer: '1954' },
+            { q: 'What is the national flower of Pakistan?', options: ['Rose', 'Jasmine', 'Sunflower', 'Tulip'], answer: 'Jasmine' },
+            { q: 'Who was the last Governor-General of Pakistan?', options: ['Iskander Mirza', 'Mohammad Ali Jinnah', 'Ayub Khan', 'Liaquat Ali Khan'], answer: 'Iskander Mirza' },
+            { q: 'Which neighboring country was the first to recognize Pakistan?', options: ['Iran', 'Afghanistan', 'China', 'Turkey'], answer: 'Iran' },
+            { q: 'Who is called Madar-e-Millat?', options: ['Fatima Jinnah', 'Benazir Bhutto', 'Begum Rana Liaquat Ali Khan', 'Asma Jahangir'], answer: 'Fatima Jinnah' },
+            { q: 'In which year did Allama Iqbal present the Allahabad Address?', options: ['1929', '1930', '1931', '1932'], answer: '1930' },
+            { q: 'Who was the last Viceroy of British India?', options: ['Lord Mountbatten', 'Lord Wavell', 'Lord Curzon', 'Lord Irwin'], answer: 'Lord Mountbatten' },
+            { q: 'What was the first capital of Pakistan?', options: ['Karachi', 'Lahore', 'Islamabad', 'Quetta'], answer: 'Karachi' },
+            { q: 'When was the Objective Resolution passed?', options: ['1949', '1956', '1962', '1973'], answer: '1949' },
+            { q: 'Who presented the Objective Resolution?', options: ['Liaquat Ali Khan', 'Zulfikar Ali Bhutto', 'Ayub Khan', 'Muhammad Ali Bogra'], answer: 'Liaquat Ali Khan' },
+            { q: "What is Pakistan's national animal?", options: ["Snow Leopard", "Markhor", "Asiatic Lion", "Black Bear"], answer: "Markhor" },
+
+            { q: "Which bird is commonly recognized as Pakistan's national/partridge bird?", options: ["Peacock", "Chukar (Chukar Partridge)", "Sparrow", "Pigeon"], answer: "Chukar (Chukar Partridge)" },
+
+            { q: "Which flower is widely regarded as Pakistan's national flower?", options: ["Rose", "Jasmine", "Lotus", "Marigold"], answer: "Jasmine" },
+
+            { q: "Which tree is traditionally associated with Pakistan and often cited as the national tree?", options: ["Deodar (Cedrus deodara)", "Neem", "Eucalyptus", "Sheesham"], answer: "Deodar (Cedrus deodara)" },
+
+            { q: "Which fruit is considered Pakistan's national/most popular fruit?", options: ["Apple", "Mango", "Banana", "Pomegranate"], answer: "Mango" },
+
+            { q: "What is the traditional, widely worn national dress of Pakistan?", options: ["Sari", "Salwar Kameez", "Sherwani only", "Kurta only"], answer: "Salwar Kameez" },
+
+            { q: "What is the official currency of Pakistan?", options: ["Rupee (PKR)", "Dollar (USD)", "Taka (BDT)", "Rial (IRR)"], answer: "Rupee (PKR)" },
+
+            { q: "Khewra, home to a famous salt mine, lies in which geological feature?", options: ["Salt Range", "Sulaiman Range", "Kirthar Range", "Himalayan Foothills"], answer: "Salt Range" },
+
+            { q: "Mangla Dam is constructed on which river?", options: ["Indus", "Jhelum", "Chenab", "Ravi"], answer: "Jhelum" },
+
+            { q: "Which is Pakistan's largest natural freshwater lake (by area)?", options: ["Manchar Lake", "Kirthar Lake", "Haleji Lake", "Kund Malir"], answer: "Manchar Lake" },
+
+            { q: "Which famous fort near Jhelum was built on the orders of Sher Shah Suri?", options: ["Rohtas Fort", "Lahore Fort", "Derawar Fort", "Shahi Qila (Multan)"], answer: "Rohtas Fort" },
+
+            { q: "Who wrote the Urdu lyrics of Pakistan's national anthem?", options: ["Hafeez Jullundhri", "Allama Iqbal", "Faiz Ahmed Faiz", "Ghalib"], answer: "Hafeez Jullundhri" },
+
+            { q: "Who composed the music for Pakistan's national anthem (the original composer)?", options: ["Nusrat Fateh Ali Khan", "Ahmed G. Chagla", "Noor Jehan", "A. R. Rahman"], answer: "Ahmed G. Chagla" },
+
+            { q: "Which Pakistani city is nicknamed the 'Manchester of Pakistan' because of its textile industry?", options: ["Faisalabad", "Gujranwala", "Sialkot", "Multan"], answer: "Faisalabad" },
+
+            { q: "Which Pakistani city is historically known as the 'City of Saints'?", options: ["Multan", "Sialkot", "Sukkur", "Hyderabad"], answer: "Multan" },
+
+            { q: "Which institution is Pakistan's central bank?", options: ["National Bank of Pakistan", "State Bank of Pakistan", "Bank of Punjab", "Habib Bank Limited"], answer: "State Bank of Pakistan" },
+
+            { q: "Which large irrigation system largely supports Pakistan's agriculture?", options: ["Indus Basin Irrigation System", "Ganges Canal System", "Nile Irrigation Network", "Murray–Darling Basin"], answer: "Indus Basin Irrigation System" },
+
+            { q: "Which historical archaeological site belongs to the Indus Valley Civilization and is located in Punjab?", options: ["Harappa", "Mohenjo-daro", "Mehrgarh", "Taxila"], answer: "Harappa" },
+
+            { q: "Which script is most commonly used to write Urdu in Pakistan?", options: ["Devanagari", "Latin", "Nastaliq (Perso-Arabic)", "Cyrillic"], answer: "Nastaliq (Perso-Arabic)" },
+
+            { q: "What three words are famously used as Pakistan's national motto?", options: ["Faith, Unity, Discipline", "Justice, Freedom, Equality", "Honor, Courage, Loyalty", "Peace, Work, Progress"], answer: "Faith, Unity, Discipline" },
+
+            { q: "Which Pakistani city hosts the famous shrine of Lal Shahbaz Qalandar (a major Sufi pilgrimage site)?", options: ["Sehwan Sharif", "Lahore", "Karachi", "Peshawar"], answer: "Sehwan Sharif" },
+
+            { q: "Who was Pakistan's first Test cricket captain?", options: ["Hanif Mohammad", "Abdul Hafeez Kardar", "Imran Khan", "Javed Miandad"], answer: "Abdul Hafeez Kardar" },
+
+            { q: "Which Pakistani fast bowler is widely credited for mastering reverse swing in the 1990s?", options: ["Wasim Akram", "Shoaib Akhtar", "Waqar Younis", "Mohammad Asif"], answer: "Wasim Akram" },
+
+            { q: "Tarbela Dam is built on which river?", options: ["Chenab", "Jhelum", "Ravi", "Indus"], answer: "Indus" },
+
+            { q: "Which desert is primarily located in western Balochistan?", options: ["Kharan Desert", "Thar Desert", "Cholistan Desert", "Dasht-e-Margo"], answer: "Kharan Desert" },
+
+            { q: "Which public university is located in Lahore and is one of the country's oldest higher education institutions (founded in 1864 as a college)?", options: ["University of the Punjab", "LUMS", "ITU", "COMSATS"], answer: "University of the Punjab" },
+
+            { q: "Which provincial language is primarily spoken in Sindh?", options: ["Sindhi", "Punjabi", "Pashto", "Balochi"], answer: "Sindhi" },
+
+            { q: "Which mine in Pakistan is world-famous for its pink and white rock salt?", options: ["Khewra Salt Mine", "Chumar Bakhoor Mine", "Saindak Mine", "Reko Diq"], answer: "Khewra Salt Mine" },
+
+            { q: "Which traditional Pakistani sweet is made of milk solids (khoya) and sugar, often shaped into small rounds?", options: ["Gulab Jamun", "Jalebi", "Halva", "Samosa"], answer: "Gulab Jamun" },
+
+            { q: 'What is the highest civilian award in Pakistan?', options: ['Nishan-e-Haider', 'Tamgha-e-Imtiaz', 'Hilal-e-Pakistan', 'Nishan-e-Pakistan'], answer: 'Nishan-e-Pakistan' },
+            { q: 'Which city is called the Heart of Pakistan?', options: ['Lahore', 'Karachi', 'Islamabad', 'Multan'], answer: 'Lahore' },
+            { q: 'Which is the national animal of Pakistan?', options: ['Markhor', 'Lion', 'Snow Leopard', 'Tiger'], answer: 'Markhor' },
+            { q: 'What is the national bird of Pakistan?', options: ['Chukar Partridge', 'Peregrine Falcon', 'Eagle', 'Peacock'], answer: 'Chukar Partridge' },
+            { q: 'Which river is the longest in Pakistan?', options: ['Jhelum', 'Indus', 'Chenab', 'Ravi'], answer: 'Indus' },
+            { q: 'Which desert is the largest in Pakistan?', options: ['Thar', 'Cholistan', 'Thal', 'Kharan'], answer: 'Thar' },
+            { q: 'Which sea is located in the south of Pakistan?', options: ['Arabian Sea', 'Red Sea', 'Caspian Sea', 'Black Sea'], answer: 'Arabian Sea' },
+            { q: 'When was the 1973 Constitution enforced?', options: ['14 August 1973', '23 March 1973', '14 August 1974', '23 March 1974'], answer: '14 August 1973' },
+            { q: 'Who was the Prime Minister during the 1973 Constitution?', options: ['Zulfikar Ali Bhutto', 'Liaquat Ali Khan', 'Benazir Bhutto', 'Yahya Khan'], answer: 'Zulfikar Ali Bhutto' },
+            { q: 'Which is the highest peak in Pakistan?', options: ['K2', 'Nanga Parbat', 'Broad Peak', 'Gasherbrum I'], answer: 'K2' },
+            { q: 'When did Pakistan join the United Nations?', options: ['30 September 1947', '14 August 1948', '21 September 1947', '1 January 1948'], answer: '30 September 1947' },
+            { q: 'Who was the first Chief Justice of Pakistan?', options: ['Sir Abdul Rashid', 'Cornelius', 'A.R. Cornelius', 'Muhammad Munir'], answer: 'Sir Abdul Rashid' },
+            { q: 'When did the first war between India and Pakistan take place?', options: ['1947-48', '1965', '1971', '1999'], answer: '1947-48' },
+            { q: 'Which operation led to the 1965 war?', options: ['Operation Gibraltar', 'Operation Zarb-e-Azb', 'Operation Swift Retort', 'Operation Silence'], answer: 'Operation Gibraltar' },
+            { q: 'Who was awarded Nishan-e-Haider in 1965 war?', options: ['Major Raja Aziz Bhatti', 'Rashid Minhas', 'M.M. Alam', 'Shabbir Sharif'], answer: 'Major Raja Aziz Bhatti' },
+            { q: 'When did the Kargil conflict take place?', options: ['1999', '1998', '2001', '1995'], answer: '1999' },
+            { q: 'Who was Pakistan’s Army Chief during Kargil?', options: ['Pervez Musharraf', 'Jehangir Karamat', 'Raheel Sharif', 'Ashfaq Pervez Kayani'], answer: 'Pervez Musharraf' },
+            { q: 'Which is the tallest building in Pakistan?', options: ['Bahria Icon Tower', 'Centaurus', 'Ocean Tower', 'Dolmen Towers'], answer: 'Bahria Icon Tower' },
+            { q: 'Which is the busiest airport in Pakistan?', options: ['Jinnah International Airport', 'Allama Iqbal International Airport', 'Islamabad International Airport', 'Bacha Khan International Airport'], answer: 'Jinnah International Airport' },
+            { q: 'Which sport has given Pakistan the most world titles?', options: ['Hockey', 'Squash', 'Cricket', 'Snooker'], answer: 'Squash' },
+            { q: 'Who was the captain when Pakistan won the 1992 Cricket World Cup?', options: ['Imran Khan', 'Wasim Akram', 'Javed Miandad', 'Waqar Younis'], answer: 'Imran Khan' },
+            { q: 'Who is known as the Sultan of Swing in cricket?', options: ['Wasim Akram', 'Waqar Younis', 'Shoaib Akhtar', 'Imran Khan'], answer: 'Wasim Akram' },
+            { q: 'Who holds the record for the fastest delivery in cricket history?', options: ['Shoaib Akhtar', 'Brett Lee', 'Shaun Tait', 'Jeff Thomson'], answer: 'Shoaib Akhtar' },
+            { q: 'Which Pakistani city is famous for surgical instruments?', options: ['Sialkot', 'Faisalabad', 'Gujrat', 'Peshawar'], answer: 'Sialkot' },
+            { q: 'Which Pakistani city is famous for sports goods?', options: ['Sialkot', 'Lahore', 'Karachi', 'Hyderabad'], answer: 'Sialkot' },
+            { q: 'Which city is called the City of Saints?', options: ['Multan', 'Sukkur', 'Peshawar', 'Quetta'], answer: 'Multan' },
+            { q: 'Which is the oldest university in Pakistan?', options: ['Punjab University', 'Karachi University', 'Quaid-i-Azam University', 'Sindh University'], answer: 'Punjab University' },
+            { q: 'Which is the largest university in Pakistan by students?', options: ['Allama Iqbal Open University', 'Punjab University', 'Karachi University', 'Virtual University'], answer: 'Allama Iqbal Open University' },
+            { q: 'Where is Minar-e-Pakistan located?', options: ['Lahore', 'Karachi', 'Islamabad', 'Quetta'], answer: 'Lahore' },
+            { q: 'Who was the founder of Khilafat Movement in India?', options: ['Ali Brothers', 'Allama Iqbal', 'Maulana Shaukat Ali', 'Maulana Mohammad Ali'], answer: 'Ali Brothers' },
+            { q: 'Which is the largest industry in Pakistan?', options: ['Textiles', 'Cement', 'Steel', 'Sugar'], answer: 'Textiles' },
+            { q: 'Which is the second largest city in Pakistan?', options: ['Lahore', 'Karachi', 'Faisalabad', 'Rawalpindi'], answer: 'Lahore' },
+            { q: 'Which city is called the City of Eagles?', options: ['Sargodha', 'Lahore', 'Gujranwala', 'Multan'], answer: 'Sargodha' },
+            { q: 'Which is the largest province of Pakistan by GDP?', options: ['Punjab', 'Sindh', 'KPK', 'Balochistan'], answer: 'Punjab' },
+            { q: 'Who was the first female fighter pilot of Pakistan?', options: ['Ayesha Farooq', 'Marium Mukhtiar', 'Shahida Abbasi', 'Nargis Latif'], answer: 'Ayesha Farooq' },
+            { q: 'Who was the first female martyr pilot of Pakistan Air Force?', options: ['Marium Mukhtiar', 'Ayesha Farooq', 'Shahida Abbasi', 'Nargis Latif'], answer: 'Marium Mukhtiar' },
+            { q: 'Which is the national dress of Pakistan?', options: ['Shalwar Kameez', 'Kurta Pajama', 'Sari', 'Sherwani'], answer: 'Shalwar Kameez' },
+            { q: 'Which is the largest oil refinery in Pakistan?', options: ['PARCO', 'Byco', 'Attock', 'National Refinery'], answer: 'PARCO' },
+            { q: 'What is the literacy rate of Pakistan (approximate 2023)?', options: ['58%', '62%', '67%', '70%'], answer: '62%' },
+            { q: 'Which is the highest dam in Pakistan?', options: ['Tarbela', 'Mangla', 'Diamer-Bhasha', 'Warsak'], answer: 'Diamer-Bhasha' },
+            { q: 'What is the name of Pakistan’s space agency?', options: ['SUPARCO', 'SPARCO', 'NASA', 'ISRO'], answer: 'SUPARCO' },
+            { q: 'When was SUPARCO established?', options: ['1961', '1965', '1971', '1980'], answer: '1961' },
+            { q: 'What is the name of Pakistan’s first satellite?', options: ['Badr-A', 'Paksat-1R', 'Badr-B', 'Paksat-1'], answer: 'Badr-A' },
+            { q: 'When was Pakistan’s first nuclear test conducted?', options: ['28 May 1998', '14 August 1997', '6 September 1998', '11 May 1998'], answer: '28 May 1998' },
+            { q: 'Where was Pakistan’s first nuclear test conducted?', options: ['Chagai Hills', 'Thar Desert', 'Tarbela', 'Kohat'], answer: 'Chagai Hills' },
+            { q: 'Which is the largest salt mine in Pakistan?', options: ['Khewra', 'Warcha', 'Kalabagh', 'Bahadur Khel'], answer: 'Khewra' },
+            { q: 'Which is the largest stadium in Pakistan?', options: ['National Stadium Karachi', 'Gaddafi Stadium', 'Multan Cricket Stadium', 'Rawalpindi Cricket Stadium'], answer: 'National Stadium Karachi' },
+            { q: 'Which Pakistani won the Nobel Peace Prize in 2014?', options: ['Malala Yousafzai', 'Abdus Salam', 'Abdul Sattar Edhi', 'Arfa Karim'], answer: 'Malala Yousafzai' },
+            { q: 'Which is the largest man-made lake in Pakistan?', options: ['Keenjhar Lake', 'Rawal Lake', 'Manchar Lake', 'Hub Dam'], answer: 'Keenjhar Lake' },
+            { q: "On what exact date did the Lahore Resolution (Pakistan Resolution) take place?", options: ["23 March 1940", "14 August 1947", "11 March 1940", "25 December 1939"], answer: "23 March 1940" },
+            { q: "Which Pakistani mountain has the highest topographic prominence (not just elevation)?", options: ["K2", "Nanga Parbat", "Tirich Mir", "Rakaposhi"], answer: "Nanga Parbat" },
+            { q: "Who was the first Governor-General of Pakistan after independence?", options: ["Liaquat Ali Khan", "Muhammad Ali Jinnah", "Khawaja Nazimuddin", "Iskander Mirza"], answer: "Muhammad Ali Jinnah" },
+            { q: "Which treaty formally ended the First Anglo-Afghan War (1842) in British records?", options: ["Treaty of Gandamak", "Treaty of Lahore", "Treaty of Rawalpindi", "Treaty of Karachi"], answer: "Treaty of Gandamak" },
+            { q: "Which city was Pakistan's capital for the shortest continuous period?", options: ["Islamabad", "Karachi", "Lahore", "Rawalpindi"], answer: "Rawalpindi" },
+            { q: "Which Pakistani scientist received the Nobel Prize (in any field)?", options: ["Abdus Salam", "Salimuzzaman Siddiqui", "Atta-ur-Rahman", "Pervez Hoodbhoy"], answer: "Abdus Salam" },
+            { q: "Karakoram Highway connects Pakistan with which Chinese province/region?", options: ["Xinjiang", "Tibet", "Sichuan", "Gansu"], answer: "Xinjiang" },
+            { q: "What is the chemical symbol for the element named after Pakistan's scientist contributions (Meitnerium-like)?", options: ["There is no element named after Pakistan", "Pk", "Pa", "Ps"], answer: "There is no element named after Pakistan" },
+            { q: "Which river is formed by the confluence of the Gilgit and Ishkoman rivers?", options: ["Hunza River", "Gilgit River", "Indus River", "Shyok River"], answer: "Gilgit River" },
+            { q: "Which Pakistani classical musician is best-known for popularizing the 'ghazal' form internationally?", options: ["Nusrat Fateh Ali Khan", "Mehdi Hassan", "Abida Parveen", "Ghulam Ali"], answer: "Mehdi Hassan" },
+            { q: "In which year did Pakistan conduct its first nuclear tests (Chagai-I)?", options: ["1998", "1974", "1983", "2000"], answer: "1998" },
+            { q: "Which Mughal emperor founded the city of Lahore's famous Shalimar Gardens?", options: ["Shah Jahan", "Jahangir", "Akbar", "Aurangzeb"], answer: "Shah Jahan" },
+            { q: "Which Pakistani author wrote the novel 'Moth Smoke'?", options: ["Mohsin Hamid", "Kamila Shamsie", "Bapsi Sidhwa", "Sara Suleri"], answer: "Mohsin Hamid" },
+            { q: "Which desert lies primarily in Pakistan's Sindh province?", options: ["Thar Desert", "Cholistan", "Kharan Desert", "Dasht-e-Margo"], answer: "Thar Desert" },
+            { q: "Which port is Pakistan's largest by shipping volume (approx.)?", options: ["Port Qasim", "Karachi Port", "Gwadar Port", "Port of Keti Bandar"], answer: "Port Qasim" },
+            { q: "Which cricketer scored Pakistan's first-ever Test double century?", options: ["Hanif Mohammad", "Inzamam-ul-Haq", "Javed Miandad", "Younis Khan"], answer: "Hanif Mohammad" },
+            { q: "Which language has the largest number of native speakers in Pakistan?", options: ["Punjabi", "Sindhi", "Pashto", "Urdu"], answer: "Punjabi" },
+            { q: "What is the UNESCO world heritage site in Pakistan known for its Buddhist ruins in Taxila date roughly to which centuries BCE–CE?", options: ["1st millennium BCE to 5th century CE", "10th–12th centuries CE", "16th–18th centuries CE", "6th–9th centuries CE"], answer: "1st millennium BCE to 5th century CE" },
+            { q: "Which Pakistani scientist led the theoretical work on the country's atomic program and is often called the 'Father of Pakistan's atomic bomb'?", options: ["Abdus Salam", "Ishfaq Ahmad", "A.Q. Khan", "Riazuddin"], answer: "Riazuddin" },
+            { q: "Which major project diverts water from the Indus to the Thar region for irrigation and development? (modern project name)", options: ["Greater Thal Canal", "Thar Desert Water Link", "Keti Bunder Scheme", "Ghazi-Barotha Project"], answer: "Greater Thal Canal" },
+            { q: "Which Pakistani painter is known for the modernist miniature movement and the series 'Bihzad' influence?", options: ["Sadequain", "Zubeida Agha", "Irfan Ahmed", "Hasnat Mehmood"], answer: "Sadequain" },
+            { q: "Which Pakistani city hosted the 1960 Asian Cricket Council early matches and had a historic stadium named after a local politician (National Stadium is in Karachi)?", options: ["Lahore", "Peshawar", "Quetta", "Faisalabad"], answer: "Lahore" },
+            { q: "Which mountain pass connects Pakistan with Afghanistan near Chitral?", options: ["Lowari Pass", "Khyber Pass", "Bolan Pass", "Khunjerab Pass"], answer: "Lowari Pass" },
+            { q: "Which sea borders Pakistan to the south?", options: ["Arabian Sea", "Bay of Bengal", "Red Sea", "Persian Gulf"], answer: "Arabian Sea" },
+            { q: "Which ancient civilization site in Pakistan is older than the Egyptian pyramids and located in Sindh?", options: ["Mohenjo-daro", "Harappa", "Mehrgarh", "Kot Diji"], answer: "Mehrgarh" },
+
+            { q: 'What is the date of Defence Day in Pakistan?', options: ['6 September', '23 March', '14 August', '27 February'], answer: '6 September' },
+            { q: 'What does 23 March commemorate in Pakistan?', options: ['Pakistan Resolution', 'Independence Day', 'Constitution Day', 'Defence Day'], answer: 'Pakistan Resolution' },
+            { q: 'Which is the national tree of Pakistan?', options: ['Deodar', 'Neem', 'Banyan', 'Pine'], answer: 'Deodar' },
+            { q: 'Who was the first woman Prime Minister of Pakistan?', options: ['Benazir Bhutto', 'Fatima Jinnah', 'Hina Rabbani Khar', 'Begum Rana Liaquat Ali Khan'], answer: 'Benazir Bhutto' },
+            { q: 'Who was the first female Speaker of National Assembly?', options: ['Fehmida Mirza', 'Benazir Bhutto', 'Khalida Kunwar', 'Shireen Mazari'], answer: 'Fehmida Mirza' },
+            { q: 'Which language was declared the national language in 1948?', options: ['Urdu', 'Punjabi', 'Sindhi', 'Bengali'], answer: 'Urdu' },
+            { q: 'Which city is called the City of Lights?', options: ['Karachi', 'Lahore', 'Quetta', 'Islamabad'], answer: 'Karachi' },
+            { q: 'Which city is called the Manchester of Pakistan?', options: ['Faisalabad', 'Karachi', 'Multan', 'Hyderabad'], answer: 'Faisalabad' },
+            { q: 'Which city is known as the Valley of Saints?', options: ['Multan', 'Lahore', 'Peshawar', 'Sialkot'], answer: 'Multan' },
+            { q: 'Who was the first President of Pakistan?', options: ['Iskander Mirza', 'Ayub Khan', 'Zulfikar Ali Bhutto', 'Liaquat Ali Khan'], answer: 'Iskander Mirza' },
+            { q: 'Which is the smallest province of Pakistan by area?', options: ['KPK', 'Sindh', 'Balochistan', 'Punjab'], answer: 'KPK' },
+            { q: 'Which province is largest by area?', options: ['Balochistan', 'Sindh', 'Punjab', 'KPK'], answer: 'Balochistan' },
+            { q: 'Which province is largest by population?', options: ['Punjab', 'Sindh', 'Balochistan', 'KPK'], answer: 'Punjab' },
+            { q: 'Which is the smallest province by population?', options: ['Balochistan', 'Sindh', 'Punjab', 'KPK'], answer: 'Balochistan' },
+            { q: 'What is the national fruit of Pakistan?', options: ['Mango', 'Banana', 'Apple', 'Guava'], answer: 'Mango' },
+            { q: 'What is the national motto of Pakistan?', options: ['Faith, Unity, Discipline', 'Unity, Faith, Discipline', 'Justice, Peace, Unity', 'Faith, Discipline, Unity'], answer: 'Faith, Unity, Discipline' },
+            { q: 'Which leader is called Quaid-e-Millat?', options: ['Liaquat Ali Khan', 'Allama Iqbal', 'Ayub Khan', 'Zulfikar Ali Bhutto'], answer: 'Liaquat Ali Khan' },
+            { q: 'Which is the largest dam in Pakistan?', options: ['Tarbela Dam', 'Mangla Dam', 'Warsak Dam', 'Diamer-Bhasha Dam'], answer: 'Tarbela Dam' },
+            { q: 'Which is the largest mosque in Pakistan?', options: ['Faisal Mosque', 'Badshahi Mosque', 'Shah Faisal Mosque', 'Grand Jamia Mosque'], answer: 'Faisal Mosque' },
+            { q: 'Where is the Badshahi Mosque located?', options: ['Lahore', 'Islamabad', 'Karachi', 'Multan'], answer: 'Lahore' },
+            { q: 'Which is the largest park in Pakistan?', options: ['Ayub National Park', 'Jinnah Park', 'Fatima Jinnah Park', 'Hill Park'], answer: 'Ayub National Park' },
+            { q: 'Which is the largest port of Pakistan?', options: ['Karachi Port', 'Gwadar Port', 'Port Qasim', 'Pasni Port'], answer: 'Karachi Port' },
+            { q: 'Which Pakistani scientist is known for work on the atomic bomb?', options: ['Abdul Qadeer Khan', 'Abdus Salam', 'Ishfaq Ahmad', 'Munir Ahmad Khan'], answer: 'Abdul Qadeer Khan' },
+            { q: 'Who is the only Pakistani to win a Nobel Prize in Physics?', options: ['Abdus Salam', 'A.Q. Khan', 'Atta-ur-Rahman', 'Parvez Hoodbhoy'], answer: 'Abdus Salam' },
+            { q: 'Which is the national airline of Pakistan?', options: ['PIA', 'Airblue', 'SereneAir', 'Shaheen Air'], answer: 'PIA' },
+            { q: 'What is the currency of Pakistan?', options: ['Rupee', 'Taka', 'Dinar', 'Dirham'], answer: 'Rupee' },
+            // { q: 'What is the calling code of Pakistan?', options: ['+92', '+91', '+90', '+94'], answer: '+92' },
+            { q: 'What is the official time zone of Pakistan?', options: ['PKT (UTC+5)', 'PST (UTC+6)', 'PKT (UTC+6)', 'IST (UTC+5.5)'], answer: 'PKT (UTC+5)' },
+            { q: 'Who was the first Muslim Commander-in-Chief of the Pakistan Army?', options: ['Ayub Khan', 'Muhammad Musa Khan', 'Tikka Khan', 'Yahya Khan'], answer: 'Ayub Khan' },
+            { q: 'What was the name of the agreement signed between Pakistan and India in 1966?', options: ['Simla Agreement', 'Tashkent Agreement', 'Delhi Pact', 'Karachi Agreement'], answer: 'Tashkent Agreement' },
+            { q: 'Which year did Pakistan become a member of the United Nations?', options: ['1947', '1948', '1950', '1952'], answer: '1947' },
+            { q: 'Who was the first female judge of the Supreme Court of Pakistan?', options: ['Khalida Rashid Khan', 'Ashraf Jehan', 'Ayesha Malik', 'Nasira Iqbal'], answer: 'Ayesha Malik' },
+            { q: 'Which is the largest desert in Pakistan?', options: ['Thar Desert', 'Cholistan Desert', 'Kharan Desert', 'Thal Desert'], answer: 'Thar Desert' },
+            { q: 'In which year was the State Bank of Pakistan established?', options: ['1948', '1949', '1950', '1952'], answer: '1948' },
+            { q: 'What is the length of Pakistan’s coastline?', options: ['1046 km', '1100 km', '990 km', '1200 km'], answer: '1046 km' },
+            { q: 'Who was the first President of Pakistan?', options: ['Iskander Mirza', 'Ayub Khan', 'Yahya Khan', 'Liaquat Ali Khan'], answer: 'Iskander Mirza' },
+            // { q: 'Which Pakistani city is known as the "City of Saints"?', options: ['Multan', 'Lahore', 'Sialkot', 'Peshawar'], answer: 'Multan' },
+            { q: 'Which is the oldest university in Pakistan?', options: ['Punjab University', 'Sindh University', 'Peshawar University', 'Karachi University'], answer: 'Punjab University' },
+            { q: 'Who was the first Governor of the State Bank of Pakistan?', options: ['Zahid Hussain', 'Mahbubul Haq', 'Shahid Kardar', 'Dr. Ishrat Hussain'], answer: 'Zahid Hussain' },
+            { q: 'What was the original name of PIA when it was founded?', options: ['Orient Airways', 'Pakistan Airways', 'Indus Airways', 'Eastern Airways'], answer: 'Orient Airways' },
+            { q: 'In which year did Pakistan conduct its first nuclear tests?', options: ['1996', '1997', '1998', '1999'], answer: '1998' },
+            { q: 'Which Pakistani city is famous for surgical instruments manufacturing?', options: ['Sialkot', 'Gujrat', 'Faisalabad', 'Lahore'], answer: 'Sialkot' },
+            { q: 'What was the name of the ship on which Muhammad Ali Jinnah traveled from Bombay to Karachi after independence?', options: ['SS Varela', 'SS Karachi', 'MV Quaid-e-Azam', 'HMS Lahore'], answer: 'SS Varela' },
+            { q: 'Who wrote Pakistan’s national anthem?', options: ['Hafeez Jalandhari', 'Allama Iqbal', 'Josh Malihabadi', 'Faiz Ahmed Faiz'], answer: 'Hafeez Jalandhari' },
+            { q: 'In which year did Pakistan win its first Cricket World Cup?', options: ['1987', '1992', '1996', '1999'], answer: '1992' },
+            { q: 'Which is the largest dam in Pakistan?', options: ['Tarbela Dam', 'Mangla Dam', 'Warsak Dam', 'Diamer-Bhasha Dam'], answer: 'Tarbela Dam' },
+            { q: 'Which Pakistani leader signed the Liaquat–Nehru Pact?', options: ['Liaquat Ali Khan', 'Ayub Khan', 'Zulfikar Ali Bhutto', 'Iskander Mirza'], answer: 'Liaquat Ali Khan' },
+            { q: 'What is the national drink of Pakistan?', options: ['Sugarcane Juice', 'Chai', 'Lassi', 'Rooh Afza'], answer: 'Sugarcane Juice' }
+
+
+        ];
+
+
+        /***** UTILS *****/
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));[array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        function humanDate() { return new Date().toLocaleString(); }
+
+        /***** APP STATE *****/
+        let questions = [];
+        let quizSet = [];
+        let currentIndex = 0;
+        let score = 0;
+        let playerName = '';
+        let playerCode = '';
+
+        // ------- 15s per-question timer -------
+        let timerInterval = null;
+        let timeLeft = 10;
+        let autoAdvanceTimeout = null; // used to auto-move to next question after answer
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeLeft = 10;
+            const tEl = document.getElementById('timer');
+            if (tEl) tEl.textContent = `⏳ ${timeLeft}s`;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                if (tEl) tEl.textContent = `⏳ ${timeLeft}s`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    handleTimeout();
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            if (autoAdvanceTimeout) {
+                clearTimeout(autoAdvanceTimeout);
+                autoAdvanceTimeout = null;
+            }
+        }
+
+
+        function handleTimeout() {
+            // mark as wrong, reveal correct answer and move to next after short delay
+            // disable option buttons
+            [...optionsEl.children].forEach(c => c.classList.add('disabled'));
+            // reveal correct option
+            const item = quizSet[currentIndex];
+            if (item) {
+                [...optionsEl.children].forEach(c => {
+                    if (c.textContent.trim() === item.answer) c.classList.add('list-group-item-success');
+                });
+            }
+            showReaction('sadfunny'); // reuse existing reaction behaviour for wrong answer
+            // enable Next button so user can see the correct answer briefly
+            const nextBtn = document.getElementById('btn-next');
+            if (nextBtn) nextBtn.disabled = false;
+            // automatically advance after 1.5s
+            setTimeout(() => { nextQuestion(); }, 1500);
+        }
+
+        const el = id => document.getElementById(id);
+
+        // UI Elements
+        const startScreen = el('start-screen');
+        const quizScreen = el('quiz-screen');
+        const resultScreen = el('result-screen');
+        const questionText = el('question-text');
+        const optionsEl = el('options');
+        const qProgress = el('q-progress');
+        const scoreEl = el('score');
+        const reactionEl = el('reaction');
+        const confettiRoot = el('confetti');
+        const topSummary = el('top-summary');
+
+        // Audio elements & controls
+        const bgAudio = el('bg-audio');
+        const audioToggle = el('audio-toggle'); // now present in HTML
+        const audioFileInput = el('audio-file');
+        const unmuteBanner = el('unmute-banner');
+
+        function setAudioSource(src, autoUnmute = false) {
+            if (!bgAudio) return;
+            bgAudio.src = src;
+            bgAudio.load();
+            if (autoUnmute) { bgAudio.muted = false; }
+        }
+
+        setAudioSource(DEFAULT_SONG, false);
+        if (bgAudio) bgAudio.loop = true;
+
+        async function tryAutoplayMuted() {
+            try {
+                if (!bgAudio) return;
+                bgAudio.muted = true;
+                await bgAudio.play();
+                updateAudioButton();
+                setTimeout(() => { if (bgAudio.muted) unmuteBanner.style.display = 'block'; }, 800);
+            } catch (e) {
+                unmuteBanner.style.display = 'block';
+            }
+        }
+
+        function updateAudioButton() {
+            if (!audioToggle || !bgAudio) return;
+            const icon = document.createElement('i');
+            icon.className = bgAudio.paused ? 'fa-solid fa-play' : 'fa-solid fa-pause';
+            audioToggle.innerHTML = '';
+            audioToggle.appendChild(icon);
+            audioToggle.insertAdjacentText('beforeend', bgAudio.paused ? ' Play' : (bgAudio.muted ? ' Play (muted)' : ' Pause'));
+        }
+
+        if (audioToggle) {
+            audioToggle.addEventListener('click', async () => {
+                if (!bgAudio) return;
+                if (bgAudio.paused) {
+                    try { await bgAudio.play(); } catch (e) { alert('Playback blocked. Please click "Enable sound" or upload a file.'); }
+                } else { bgAudio.pause(); }
+                updateAudioButton();
+            });
+        }
+
+        if (audioFileInput) {
+            audioFileInput.addEventListener('change', (ev) => {
+                const f = ev.target.files && ev.target.files[0];
+                if (!f) return;
+                const url = URL.createObjectURL(f);
+                setAudioSource(url, true);
+                bgAudio.play().then(() => updateAudioButton()).catch(() => updateAudioButton());
+                unmuteBanner.style.display = 'none';
+            });
+        }
+
+        if (unmuteBanner) {
+            unmuteBanner.addEventListener('click', async () => {
+                if (!bgAudio) return;
+                bgAudio.muted = false; try { await bgAudio.play(); } catch (e) { }
+                unmuteBanner.style.display = 'none'; updateAudioButton();
+            });
+        }
+
+        el('btn-start').addEventListener('click', async () => {
+            const nameInput = el('player-name').value.trim() || 'Anonymous';
+            const codeInput = (el('employee-code').value || '').trim();
+
+            if (!codeInput) { alert('Please enter your employee code (unique).'); return; }
+
+            playerName = nameInput;
+            playerCode = codeInput.toUpperCase(); // normalize (optional)
+            el('player-label').textContent = `${playerName} · ${playerCode}`;
+
+            await loadQuestions();
+            prepareQuiz();
+            startScreen.style.display = 'none';
+            quizScreen.style.display = 'block';
+            resultScreen.style.display = 'none';
+            renderQuestion();
+            try { if (bgAudio) { bgAudio.muted = false; await bgAudio.play(); } } catch (e) { }
+            unmuteBanner.style.display = 'none';
+            updateAudioButton();
+        });
+
+
+        if (bgAudio) {
+            bgAudio.addEventListener('ended', () => {
+                try { bgAudio.currentTime = 0; bgAudio.play(); } catch (e) { }
+            });
+        }
+
+        function loadLeaderboard() {
+            const KEY = 'pak_quiz_leaderboard';
+
+            // If nothing at the new key, but there is an older key 'leaderboard', migrate it.
+            if (!localStorage.getItem(KEY) && localStorage.getItem('leaderboard')) {
+                try {
+                    localStorage.setItem(KEY, localStorage.getItem('leaderboard'));
+                    localStorage.removeItem('leaderboard');
+                } catch (e) {
+                    console.warn('Failed to migrate old leaderboard key:', e);
+                }
+            }
+
+            const raw = localStorage.getItem(KEY);
+            try {
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                console.warn('Corrupt leaderboard data, resetting.', e);
+                localStorage.removeItem(KEY);
+                return [];
+            }
+        }
+
+        function saveLeaderboard(list) {
+            localStorage.setItem('pak_quiz_leaderboard', JSON.stringify(list));
+            updateTopSummary();
+        }
+        function updateTopSummary() {
+            const lb = loadLeaderboard().sort((a, b) => b.score - a.score);
+            if (lb.length === 0) topSummary.textContent = 'Top: —';
+            else topSummary.textContent = `Top: ${lb[0].name} · ${lb[0].code} (${lb[0].score})`;
+        }
+
+        // add or update entry in localStorage under 'pak_quiz_leaderboard'
+        // Now uses employee code as the unique identifier
+        function addOrUpdateLeaderboardEntry(code, name, newScore) {
+            const key = 'pak_quiz_leaderboard';
+            const raw = localStorage.getItem(key);
+            let list = [];
+            try { list = raw ? JSON.parse(raw) : []; } catch (e) { console.warn('Corrupt leaderboard data, resetting.'); localStorage.removeItem(key); list = []; }
+
+            const normalized = String(code).toLowerCase();
+            const idx = list.findIndex(r => String(r.code || '').toLowerCase() === normalized);
+
+            if (idx >= 0) {
+                // update name (in case it changed) and score only if improved
+                if (newScore > list[idx].score) {
+                    list[idx].score = newScore;
+                    list[idx].name = name;
+                    list[idx].date = humanDate();
+                } else {
+                    // update name & date if name changed but score didn't (optional)
+                    if (list[idx].name !== name) list[idx].name = name;
+                }
+            } else {
+                list.push({ id: Date.now(), code: String(code), name: name || 'Anonymous', score: newScore, date: humanDate() });
+            }
+
+            // sort by score desc, then most recent date
+            list.sort((a, b) => b.score - a.score || (b.date > a.date ? 1 : -1));
+            const trimmed = list.slice(0, 200);
+            localStorage.setItem(key, JSON.stringify(trimmed));
+            updateTopSummary();
+            return trimmed;
+        }
+
+
+        // ---------- Sidebar leaderboard renderer (uses pak_quiz_leaderboard) ----------
+        function renderSidebarLeaderboard() {
+            const listEl = document.getElementById('leaderboard-list');
+            if (!listEl) return;
+
+            const rows = loadLeaderboard().sort((a, b) => b.score - a.score).slice(0, 10);
+            listEl.innerHTML = '';
+
+            if (rows.length === 0) {
+                listEl.innerHTML = '<div class="text-center text-muted py-3">No scores yet — be the first!</div>';
+                return;
+            }
+
+            const maxScore = QUESTIONS_PER_QUIZ || 1;
+
+            rows.forEach((r, i) => {
+                const rank = i + 1;
+                const li = document.createElement('div');
+                li.className = 'lb-entry';
+                if (rank === 1) li.classList.add('first-place');
+                else if (rank === 2) li.classList.add('second-place');
+                else if (rank === 3) li.classList.add('third-place');
+
+                const trophy = rank === 1 ? '🏆' : (rank === 2 ? '🥈' : (rank === 3 ? '🥉' : `<div style="font-weight:800;color:#556b5e">${rank}</div>`));
+                const crownHtml = rank === 1 ? '<span class="crown">👑</span>' : '';
+                const percent = Math.round((Number(r.score || 0) / maxScore) * 100);
+
+                li.innerHTML = `
+          <div class="rank-badge">${trophy}</div>
+          <div class="info">
+            <div class="name">${crownHtml}${escapeHtml(r.name)} · ${escapeHtml(r.code)}</div>
+            <div class="meta">${escapeHtml(r.date)}</div>
+            <div class="bar-wrap"><div class="bar" style="width:${percent}%"></div></div>
+          </div>
+          <div class="score">${percent}%</div>
+        `;
+                listEl.appendChild(li);
+            });
+        }
+
+
+
+
+
+        // Render sidebar initially
+        renderSidebarLeaderboard();
+
+        function clearLeaderboard() {
+            if (!confirm('Clear the leaderboard? This cannot be undone.')) return;
+            localStorage.removeItem('pak_quiz_leaderboard');
+            updateTopSummary();
+            renderSidebarLeaderboard();
+        }
+
+        function exportLeaderboardCSV() {
+            const rows = loadLeaderboard();
+            if (rows.length === 0) { alert('Leaderboard is empty.'); return; }
+            const csv = ['"#","Name","Score","Date"'].concat(rows.map((r, i) => `${i + 1},"${r.name}",${r.score},"${r.date}"`)).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'pak_quiz_leaderboard.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+        }
+        function showLeaderboardModal() {
+            // load and sort top 10
+            const list = loadLeaderboard().sort((a, b) => b.score - a.score).slice(0, 10);
+            const container = el('leaderboard-list');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            if (list.length === 0) {
+                container.innerHTML = '<div class="text-center text-muted py-3">No scores yet — be the first!</div>';
+            } else {
+                list.forEach((row, i) => {
+                    const rank = i + 1;
+                    const entry = document.createElement('div');
+                    entry.className = 'lb-entry';
+                    if (rank === 1) entry.classList.add('first-place');
+                    else if (rank === 2) entry.classList.add('second-place');
+                    else if (rank === 3) entry.classList.add('third-place');
+
+                    // trophy icons for top 3; plain rank for others
+                    const trophy = rank === 1 ? '🏆' : (rank === 2 ? '🥈' : (rank === 3 ? '🥉' : rank));
+
+                    entry.innerHTML = `
+        <div class="rank-badge">${trophy}</div>
+        <div class="info">
+          <div class="name">${escapeHtml(row.name)}</div>
+          <div class="meta">${escapeHtml(row.date)}</div>
+        </div>
+        <div class="score">${row.score}</div>
+      `;
+                    container.appendChild(entry);
+                });
+            }
+
+            // show modal
+            const lbModal = new bootstrap.Modal(document.getElementById('leaderboardModal'));
+            lbModal.show();
+        }
+
+        function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
+
+        function showReaction(type) {
+            reactionEl.className = 'reaction show';
+            if (type === 'joy') {
+                reactionEl.innerHTML = '<div class="text-center"><div style="font-size:3rem">🎉🇵🇰</div><div class="mt-2 fw-bold brand">Well done!</div></div>';
+                spawnConfetti();
+            } else {
+                reactionEl.innerHTML = '<div class="text-center" style="z-index:9999"><div style="font-size:3rem"> <img src="https://cdn.pixabay.com/photo/2020/02/07/12/54/emoji-4827091_640.png" height="200px" alt="" style="z-index:9999"></div><div class="mt-2 fw-bold text-secondary">Oops — try next!</div></div>';
+            }
+            setTimeout(() => { reactionEl.className = 'reaction'; }, 900);
+        }
+        function spawnConfetti() {
+            confettiRoot.innerHTML = '';
+            const emojis = ['🇵🇰', '🎉', '✨'];
+            for (let i = 0; i < 18; i++) {
+                const el = document.createElement('div'); el.className = 'piece';
+                el.style.left = Math.random() * 100 + '%';
+                el.style.top = (-10 - Math.random() * 20) + 'vh';
+                el.style.fontSize = (12 + Math.random() * 20) + 'px';
+                el.style.animationDuration = (2 + Math.random() * 3) + 's';
+                el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                confettiRoot.appendChild(el);
+            }
+            setTimeout(() => { confettiRoot.innerHTML = ''; }, 3500);
+        }
+
+        /***** GAME FLOW *****/
+        async function loadQuestions() {
+            if (REMOTE_QUESTION_ENDPOINT) {
+                try {
+                    const res = await fetch(REMOTE_QUESTION_ENDPOINT);
+                    const data = await res.json();
+                    if (Array.isArray(data) && data.length) { questions = data; return; }
+                } catch (e) { console.warn('Failed to fetch remote questions, falling back to sample.', e); }
+            }
+            questions = sampleQuestions.slice();
+        }
+
+        function prepareQuiz() {
+            quizSet = shuffle(questions.slice()).slice(0, QUESTIONS_PER_QUIZ);
+            currentIndex = 0; score = 0;
+            scoreEl.textContent = score;
+        }
+
+        function renderQuestion() {
+            const item = quizSet[currentIndex];
+            qProgress.textContent = `Question ${currentIndex + 1}/${quizSet.length}`;
+            questionText.textContent = item.q;
+            optionsEl.innerHTML = '';
+            const opts = shuffle(item.options.slice());
+            opts.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'list-group-item list-group-item-action option-btn';
+                btn.innerHTML = `<div>${escapeHtml(opt)}</div>`;
+                btn.onclick = () => chooseOption(opt, item.answer, btn);
+                optionsEl.appendChild(btn);
+            });
+            el('btn-next').disabled = true;
+            startTimer();
+        }
+
+        function chooseOption(selected, correct, btn) {
+            // stop the per-question timer and clear any pending auto-advance
+            stopTimer();
+
+            // disable all options immediately to prevent further clicks
+            [...optionsEl.children].forEach(c => c.classList.add('disabled'));
+
+            // show result (correct / wrong) and reveal correct answer if wrong
+            if (selected === correct) {
+                btn.classList.add('list-group-item-success');
+                score++;
+                scoreEl.textContent = score;
+                showReaction('joy');
+            } else {
+                btn.classList.add('list-group-item-danger');
+                showReaction('sadfunny');
+                [...optionsEl.children].forEach(c => {
+                    if (c.textContent.trim() === correct) c.classList.add('list-group-item-success');
+                });
+            }
+
+            // Keep Next button enabled for manual override if you want
+            const nextBtn = el('btn-next');
+            if (nextBtn) nextBtn.disabled = false;
+
+            // Schedule automatic advance (short delay so user sees feedback)
+            autoAdvanceTimeout = setTimeout(() => {
+                autoAdvanceTimeout = null;
+                nextQuestion();
+            }, 1500); // 900ms delay — adjust (600-1200ms) to taste
+        }
+
+
+        function nextQuestion() {
+            currentIndex++;
+            if (currentIndex < quizSet.length) renderQuestion();
+            else finishQuiz();
+        }
+
+        function finishQuiz() {
+            quizScreen.style.display = 'none'; resultScreen.style.display = 'block';
+            el('final-score').textContent = score;
+            el('result-title').textContent = score >= Math.ceil(quizSet.length * 0.6) ? 'Great Job!' : 'Nice Try!';
+        }
+        // Show the score popup (calculate % & message) when user clicks "Submit Score"
+        el('btn-submit-score').addEventListener('click', () => {
+            // compute percent
+            const total = (quizSet && quizSet.length) ? quizSet.length : QUESTIONS_PER_QUIZ;
+            const percent = Math.round((score / total) * 100);
+            // update modal contents
+            el('score-percent').textContent = `${percent}%`;
+            el('score-value').textContent = score;
+            el('score-total').textContent = total;
+
+            // friendly message
+            let msg = '';
+            if (percent >= 90) msg = 'Incredible — you are a true patriot! 🇵🇰';
+            else if (percent >= 75) msg = 'Amazing — very patriotic!';
+            else if (percent >= 50) msg = 'Good job — you know your country well.';
+            else if (percent >= 30) msg = 'Not bad — keep learning!';
+            else msg = 'Keep trying — learn more about Pakistan and try again!';
+
+            el('score-message').textContent = msg;
+
+            // show the modal
+            const modal = new bootstrap.Modal(document.getElementById('scoreModal'));
+            modal.show();
+        });
+
+        // When user confirms "Save to Leaderboard"
+        el('confirm-save-score').addEventListener('click', () => {
+            const prevTop = loadLeaderboard().sort((a, b) => b.score - a.score)[0]?.score || 0;
+
+            // prefer stored playerCode, fallback to input
+            const code = playerCode || (el('employee-code') && el('employee-code').value.trim());
+            if (!code) { alert('Employee code missing — cannot save.'); return; }
+
+            const name = playerName || (el('player-name') && el('player-name').value.trim()) || 'Anonymous';
+            addOrUpdateLeaderboardEntry(code, name, score);
+            renderSidebarLeaderboard();
+            updateTopSummary();
+
+            const newTop = loadLeaderboard().sort((a, b) => b.score - a.score)[0]?.score || 0;
+            if (score > prevTop && score === newTop) spawnConfetti();
+
+            // hide modal
+            const modalEl = document.getElementById('scoreModal');
+            const inst = bootstrap.Modal.getInstance(modalEl);
+            if (inst) inst.hide();
+        });
+
+
+
+
+        /***** BIND EVENTS *****/
+        el('btn-next').addEventListener('click', () => nextQuestion());
+        el('btn-restart').addEventListener('click', () => { startScreen.style.display = 'block'; quizScreen.style.display = 'none'; resultScreen.style.display = 'none'; });
+        // el('btn-submit-score').addEventListener('click', () => { submitScore(); });
+        el('btn-leaderboard').addEventListener('click', () => {
+            renderSidebarLeaderboard();
+            // scroll to top (adjust to your layout)
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        el('btn-clear').addEventListener('click', () => { clearLeaderboard(); });
+        el('btn-export').addEventListener('click', () => { exportLeaderboardCSV(); });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && quizScreen.style.display === 'block') {
+                const first = [...optionsEl.children].find(c => !c.classList.contains('disabled'));
+                if (first) first.click();
+            }
+        });
+
+        (function init() {
+            updateTopSummary();
+            if (REMOTE_QUESTION_ENDPOINT) loadQuestions();
+            tryAutoplayMuted();
+        })();
+    </script>
+
+    <script>
+        // Small fallback enable-sound button for blocked autoplay (keeps previous behavior)
+        const audio = document.getElementById('bg-audio');
+        if (audio) {
+            audio.play().catch(() => {
+                console.warn('Autoplay with sound blocked, showing enable sound button.');
+                const enable = document.getElementById('enable-sound');
+                if (enable) enable.style.display = 'block';
+            });
+        }
+        const enableSoundBtn = document.getElementById('enable-sound');
+        if (enableSoundBtn) {
+            enableSoundBtn.addEventListener('click', () => {
+                if (!audio) return;
+                audio.muted = false;
+                audio.play();
+                enableSoundBtn.style.display = 'none';
+            });
+        }
+    </script>
+</body>
+
+</html>
