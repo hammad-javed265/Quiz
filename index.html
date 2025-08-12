@@ -324,11 +324,14 @@
                 max-height: 40vh;
             }
         }
-        @media (max-width: 768px) { /* mobile and small tablets */
-    .hide-mobile {
-        display: none !important;
-    }
-}
+
+        @media (max-width: 768px) {
+
+            /* mobile and small tablets */
+            .hide-mobile {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 
@@ -395,7 +398,7 @@
     </nav>
     <div class="d-flex" style="height: calc(100vh - 147px);">
         <!-- Left Sidebar (1/4 width) -->
-       <div class="col-3 col-md-3 col-lg-3 bg-light p-3 hide-mobile" style="overflow: auto;">
+        <div class="col-3 col-md-3 col-lg-3 bg-light p-3 hide-mobile" style="overflow: auto;">
 
             <div class="leaderboard card shadow-sm">
                 <div class="card-header bg-success text-white text-center fw-bold">
@@ -531,10 +534,39 @@
 
     <div id="unmute-banner" class="position-fixed bottom-0 end-0 m-3 p-2 bg-success text-white rounded"
         style=" cursor:pointer">Enable sound 🔊</div>
+    <!-- add these near the top (head) BEFORE your inline app script -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         /***** CONFIGURATION ******/
+        /***** FIREBASE CONFIG (paste below your CONFIGURATION) ******/
+        const USE_FIRESTORE = true; // set false to disable remote storage
+
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyDGDaCRqqwvvdSRCmlzMS4Y3y1CvCV2_4U",
+            authDomain: "quiz-dea12.firebaseapp.com",
+            projectId: "quiz-dea12",
+            storageBucket: "quiz-dea12.firebasestorage.app",
+            messagingSenderId: "830744616929",
+            appId: "1:830744616929:web:7814cd5725973623f6bca0",
+            measurementId: "G-YEQVBMWZVX"
+        };
+
+        let firestore = null;
+        if (USE_FIRESTORE) {
+            try {
+                firebase.initializeApp(FIREBASE_CONFIG);
+                firestore = firebase.firestore();
+                console.log('✅ Firestore initialized');
+            } catch (e) {
+                console.error('Firestore init error', e);
+                firestore = null;
+            }
+        }
+
+
         const REMOTE_QUESTION_ENDPOINT = null;
         const QUESTIONS_PER_QUIZ = 15;
         // const DEFAULT_SONG = 'https://www.poemsurdu.com/wp-content/uploads/2015/07/Dil-Dil-Pakistan.mp3';
@@ -810,6 +842,35 @@
             return array;
         }
         function humanDate() { return new Date().toLocaleString(); }
+        // save single entry to Firestore (doc id = employee code)
+        async function saveToFirestore(entry) {
+            if (!firestore) return;
+            try {
+                // use code as document id so updates overwrite the same user
+                const docId = String(entry.code || entry.id || Date.now());
+                await firestore.collection('leaderboard').doc(docId).set(entry, { merge: true });
+                // console.log('saved to firestore', docId);
+            } catch (e) {
+                console.error('Failed to save to Firestore', e);
+            }
+        }
+
+        // fetch full leaderboard from Firestore (optional)
+        async function fetchRemoteLeaderboard(limit = 200) {
+            if (!firestore) return [];
+            try {
+                const snap = await firestore.collection('leaderboard')
+                    .orderBy('score', 'desc')
+                    .limit(limit)
+                    .get();
+                const rows = [];
+                snap.forEach(d => rows.push(d.data()));
+                return rows;
+            } catch (e) {
+                console.error('Failed to fetch leaderboard from Firestore', e);
+                return [];
+            }
+        }
 
         /***** APP STATE *****/
         let questions = [];
@@ -1008,6 +1069,24 @@
             if (lb.length === 0) topSummary.textContent = 'Top: —';
             else topSummary.textContent = `Top: ${lb[0].name} · ${lb[0].code} (${lb[0].score})`;
         }
+        async function loadRemoteThenRender() {
+            if (!USE_FIRESTORE || !firestore) return;
+            const remote = await fetchRemoteLeaderboard(50);
+            if (remote && remote.length) {
+                // optionally overwrite localStorage so UI uses remote results:
+                localStorage.setItem('pak_quiz_leaderboard', JSON.stringify(remote));
+                renderSidebarLeaderboard();
+                updateTopSummary();
+            }
+        }
+
+        // call in init()
+        (async function init() {
+            updateTopSummary();
+            if (USE_FIRESTORE) await loadRemoteThenRender();
+            if (REMOTE_QUESTION_ENDPOINT) loadQuestions();
+            tryAutoplayMuted();
+        })();
 
         // add or update entry in localStorage under 'pak_quiz_leaderboard'
         // Now uses employee code as the unique identifier
@@ -1021,26 +1100,36 @@
             const idx = list.findIndex(r => String(r.code || '').toLowerCase() === normalized);
 
             if (idx >= 0) {
-                // update name (in case it changed) and score only if improved
                 if (newScore > list[idx].score) {
                     list[idx].score = newScore;
                     list[idx].name = name;
                     list[idx].date = humanDate();
                 } else {
-                    // update name & date if name changed but score didn't (optional)
                     if (list[idx].name !== name) list[idx].name = name;
                 }
             } else {
                 list.push({ id: Date.now(), code: String(code), name: name || 'Anonymous', score: newScore, date: humanDate() });
             }
 
-            // sort by score desc, then most recent date
             list.sort((a, b) => b.score - a.score || (b.date > a.date ? 1 : -1));
             const trimmed = list.slice(0, 200);
             localStorage.setItem(key, JSON.stringify(trimmed));
             updateTopSummary();
+
+            // --- NEW: push single user record to Firestore (non-blocking) ---
+            try {
+                const userRecord = trimmed.find(r => String(r.code || '').toLowerCase() === normalized);
+                if (userRecord && USE_FIRESTORE) {
+                    // optionally await this if you need guaranteed write
+                    saveToFirestore(userRecord);
+                }
+            } catch (e) {
+                console.warn('Firestore push failed', e);
+            }
+
             return trimmed;
         }
+
 
 
         // ---------- Sidebar leaderboard renderer (uses pak_quiz_leaderboard) ----------
