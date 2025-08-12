@@ -256,6 +256,79 @@
         .lb-entry {
             animation: entry-in .28s ease both;
         }
+
+        :root {
+            --nav-safe: 148px;
+            /* approx height of your two navs */
+        }
+
+        /***** Layout container *****/
+        .app-shell {
+            min-height: 100svh;
+            /* better on mobile than 100vh */
+        }
+
+        /* Sidebar list height that won’t choke on mobile address bar */
+        #leaderboard-list-sidebar {
+            max-height: 45vh;
+        }
+
+        /* Apply the same nice styles to both side + modal lists */
+        #leaderboard-list-sidebar,
+        #leaderboard-list-modal {
+            padding: 10px;
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Touch-friendly options */
+        #options .list-group-item {
+            padding: 12px 14px;
+            line-height: 1.3;
+        }
+
+        /* Start section: stack on mobile */
+        #start-screen .intro-flex {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        #start-screen .intro-flex img {
+            width: 120px !important;
+            height: auto;
+            margin: 0 0 8px 0;
+        }
+
+        /* Condense margins on small screens */
+        @media (max-width: 576px) {
+            body {
+                background-image: none;
+            }
+
+            /* keep it light on phones */
+            .navbar-brand img {
+                height: 48px;
+            }
+
+            .quiz-card {
+                border-radius: 14px;
+            }
+
+            .page-section {
+                margin-top: 12px !important;
+            }
+
+            #leaderboard-list-sidebar {
+                max-height: 40vh;
+            }
+        }
+        @media (max-width: 768px) { /* mobile and small tablets */
+    .hide-mobile {
+        display: none !important;
+    }
+}
     </style>
 </head>
 
@@ -296,7 +369,7 @@
     <nav class="navbar navbar-expand-lg" style="background:linear-gradient(90deg,var(--pak-green),#00924a);">
         <div class="container">
             <a class="navbar-brand text-white fw-bold" href="#">
-                🇵🇰 <span class="ms-2">میں ہوں پاکستانی</span>
+                🇵🇰 <span class="ms-2">میں پاکستانی</span>
             </a>
             <div class="d-flex align-items-center">
                 <div class="me-3 text-white small" id="top-summary">Top: —</div>
@@ -322,7 +395,8 @@
     </nav>
     <div class="d-flex" style="height: calc(100vh - 147px);">
         <!-- Left Sidebar (1/4 width) -->
-        <div class="col-3 col-md-3 col-lg-3 bg-light p-3" style="overflow: auto;">
+       <div class="col-3 col-md-3 col-lg-3 bg-light p-3 hide-mobile" style="overflow: auto;">
+
             <div class="leaderboard card shadow-sm">
                 <div class="card-header bg-success text-white text-center fw-bold">
                     🏆 Leaderboard
@@ -335,13 +409,13 @@
         </div>
 
         <!-- Main Content (3/4 width) -->
-        <main class="col-9 col-md-9 col-lg-9 container" style="opacity: 0.9;">
+        <main class=" col-md-9 col-lg-9 col-sm-11 container" style="opacity: 0.9;">
             <div class="row justify-content-center" style="margin-top: 13%;">
-                <div class="col-lg-8 col-md-10">
+                <div class="col-lg-8 col-sm-12 col-md-10">
                     <div class="card p-4 quiz-card" style="background-color: #e5ffef;">
                         <div id="start-screen">
                             <div class="d-flex align-items-center">
-                                <div class="me-3">
+                                <div class="me-3 hide-mobile">
                                     <img src="https://upload.wikimedia.org/wikipedia/commons/4/43/Flag_map_of_Pakistan.png"
                                         alt="flag" style="border-radius:6px; height:auto; width:200px">
                                 </div>
